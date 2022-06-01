@@ -1,0 +1,3 @@
+Tipper is a dapp built on the celo blockchain and with ReactJS that enables transparency in the tipping system. Only Organizations have the ability to add staff and then anyone can tip those employees. Customers can tip employees digitally without requiring cash and also Employees can see the total amount of money they have been tipped and money can then be split equally and not based on guesses.
+
+Link: https://vermillion-puffpuff-0c6da6.netlify.app/
