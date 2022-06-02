@@ -37,18 +37,31 @@ contract Tipper{
         string jobDescription;
         uint totalAmount;
     }
-    address internal companyAddress = msg.sender;
+    address internal companyAddress;
+
     address internal cUsdTokenAddress =
         0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
     mapping(uint256 => Staff) internal staffs;
     uint staffLength = 0;
 
+    mapping(address => bool) admins;
 
-    modifier isAdmin() {
-        require(msg.sender == companyAddress, "Accessible only to the admin");
+    modifier isAdmin() {        
+        require(admins[msg.sender], "Accessible only to the admin");
         _;
     }
 
+    constructor() {    
+        companyAddress = msg.sender; // set the company address at deployment
+        admins[companyAddress] = true; // add company address to admins
+    }
+
+    // only company can add a new admin
+    function addNewAdmin(address _newAdminAddress) public isAdmin {
+        admins[_newAdminAddress] = true;
+    }
+
+    // add a new staff
     function addStaff(
         string memory _name,
         string memory _image,
@@ -68,6 +81,7 @@ contract Tipper{
         staffLength++;
     }
 
+    // get staff at inded `_index`
     function getStaff(uint _index)public view returns(
         address payable,
         string memory,
@@ -88,6 +102,8 @@ contract Tipper{
            _staff.totalAmount
        );
     }
+
+    // tip staff at index `_index` with amount `_amount`
     function tipStaff(uint _index, uint256 amount) public payable {
         require(
             IERC20Token(cUsdTokenAddress).transferFrom(
@@ -100,17 +116,23 @@ contract Tipper{
         staffs[_index].totalAmount += amount;
     }
 
+    // check is `address` is admin
     function isUserAdmin(address _address) public view returns (bool) {
-        if (_address == companyAddress) {
-            return true;
-        }
-        return false;
+       return admins[_address];
     }
 
-    function changeAdminAddress(address _address)public{
-        companyAddress = _address;
+    // remove admin privilledge from `_adminAddress`
+    function removeAdmin(address _adminAddress) public {
+        require(msg.sender == companyAddress); // only company can remove admin right from user
+        admins[_adminAddress] = false;
     }
 
+    // this function creates a loop hole in contract
+    // function changeAdminAddress(address _address)public{
+    //     companyAddress = _address;
+    // }
+
+    // get total length of staff
     function getStaffLength() public view returns(uint){
         return staffLength;
     }
